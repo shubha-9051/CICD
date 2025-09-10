@@ -22,7 +22,7 @@ jobs:
         run: |
           IMAGE=dockershubha9051/mydocker
           TAG=${GITHUB_SHA}
-          docker build -t $IMAGE:$TAG .
+          docker build -t $IMAGE:$TAG ./frontend
           echo "IMAGE_NAME=$IMAGE:$TAG" >> $GITHUB_ENV
 
       # 4. Push image to Docker Hub
