@@ -55,4 +55,5 @@ jobs:
             git commit -m "Update image to ${{ env.IMAGE_NAME }}"
             git push https://x-access-token:${{ secrets.MANIFESTS_REPO_TOKEN }}@github.com/shubha-9051/kubernetes-deployments.git main
           fi
+####
                         
