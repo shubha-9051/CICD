@@ -41,7 +41,7 @@ jobs:
       - name: Update Deployment YAML
         run: |
           cd manifests-repo
-          sed -i "s|\(image: *dockershubha9051/mydocker:\).*|\1${{ env.TAG }}|" cicd-project/deployment.yaml
+          sed -i "s|\(image: *dockershubha9051/mydocker:\).*|\1${{ env.TAG }}|" cicd-project/deployment.yml
 
       - name: Commit and Push
         run: |
@@ -51,7 +51,7 @@ jobs:
           if git diff --quiet; then
             echo "No changes to commit."
           else
-            git add cicd-project/deployment.yaml
+            git add cicd-project/deployment.yml
             git commit -m "Update image to ${{ env.IMAGE_NAME }}"
             git push origin main
           fi
