@@ -42,7 +42,7 @@ jobs:
         run: |
           cd manifests-repo
           sed -i "s|\(image: *dockershubha9051/mydocker:\).*|\1${{ env.TAG }}|" cicd-project/deployment.yml
-
+      
       - name: Commit and Push
         run: |
           cd manifests-repo
@@ -53,5 +53,6 @@ jobs:
           else
             git add cicd-project/deployment.yml
             git commit -m "Update image to ${{ env.IMAGE_NAME }}"
-            git push origin main
+            git push https://x-access-token:${{ secrets.MANIFESTS_REPO_TOKEN }}@github.com/shubha-9051/kubernetes-deployments.git main
           fi
+                        
