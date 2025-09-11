@@ -2,32 +2,51 @@ name: CI/CD React Frontend
 
 on:
   push:
-    branches: [ main ]  # Runs only on main branch push
+    branches: [ main ]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout code
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      # 2. Log in to Docker Hub
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      # 3. Build Docker image
-      - name: Build Docker image
+      - name: Set image tag
         run: |
-          IMAGE=dockershubha9051/mydocker
-          TAG=${GITHUB_SHA}
-          docker build -t $IMAGE:$TAG ./frontend
-          echo "IMAGE_NAME=$IMAGE:$TAG" >> $GITHUB_ENV
+          echo "IMAGE=dockershubha9051/mydocker" >> $GITHUB_ENV
+          echo "TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
+          echo "IMAGE_NAME=dockershubha9051/mydocker:${GITHUB_SHA::7}" >> $GITHUB_ENV
 
-      # 4. Push image to Docker Hub
+      - name: Build Docker image
+        run: docker build -t ${{ env.IMAGE_NAME }} ./frontend
+
       - name: Push Docker image
         run: docker push ${{ env.IMAGE_NAME }}
 
-      # 5. Update Kubernetes manifests repo
-      
+      - name: Clone Manifests Repo
+        run: |
+          git clone https://x-access-token:${{ secrets.MANIFESTS_REPO_TOKEN }}@github.com/shubha-9051/kubernetes-deployments.git manifests-repo
+          cd manifests-repo
+          git checkout main
+
+      - name: Update Deployment YAML
+        run: |
+          cd manifests-repo
+          sed -i "s|\(image: *dockershubha9051/mydocker:\).*|\1${{ env.TAG }}|" cicd-project/deployment.yaml
+
+      - name: Commit and Push
+        run: |
+          cd manifests-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No changes to commit."
+          else
+            git add cicd-project/deployment.yaml
+            git commit -m "Update image to ${{ env.IMAGE_NAME }}"
+            git push origin main
+          fi
