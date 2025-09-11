@@ -32,6 +32,11 @@ jobs:
           git clone https://x-access-token:${{ secrets.MANIFESTS_REPO_TOKEN }}@github.com/shubha-9051/kubernetes-deployments.git manifests-repo
           cd manifests-repo
           git checkout main
+      
+      - name: Debug repo structure
+        run: |
+          cd manifests-repo
+          ls -R
 
       - name: Update Deployment YAML
         run: |
